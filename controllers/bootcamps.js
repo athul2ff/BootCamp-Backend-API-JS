@@ -1,7 +1,9 @@
+const path = require("path");
+const slugify = require("slugify");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
-const Bootcamp = require("../models/bootcamp");
 const geocoder = require("../utils/geocoder");
+const Bootcamp = require("../models/bootcamp");
 
 // @desc     Get all bootcamps
 // @routes   GET /api/v1/bootcamps
@@ -25,7 +27,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
   queryStr = queryStr.replace(/\b(gt|lte|or|gte)\b/g, (match) => `$${match}`);
 
   // Finding resource
-  query = Bootcamp.find(JSON.parse(queryStr));
+  query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
 
   // Select fields
   if (req.query.select) {
@@ -43,7 +45,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
   // Pagination
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
   const total = await Bootcamp.countDocuments();
@@ -133,16 +135,22 @@ exports.updateBootcamp = async (req, res, next) => {
 // @desc     Delete bootcamps
 // @routes   DELETE /api/v1/bootcamps/:id
 // @access   Public
-exports.deleteBootcamp = async (req, res, next) => {
-  try {
-    await Bootcamp.findByIdAndRemove(req.params.id);
-    res
-      .status(200)
-      .json({ success: true, msg: `Delete bootcamps ${req.params.id}` });
-  } catch (error) {
-    next(error);
+// @desc      Delete bootcamp
+// @route     DELETE /api/v1/bootcamps/:id
+// @access    Private
+exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findByIdAndRemove(req.params.id);
+
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+    );
   }
-};
+
+  // await bootcamp.remove();
+
+  res.status(200).json({ success: true, data: {} });
+});
 
 // @desc     Get bootcamp within a radius
 // @routes   GET /api/v1/bootcamps/radius/:zipcode/:distance
