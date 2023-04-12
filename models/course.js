@@ -67,7 +67,7 @@ courseSchema.statics.getAverageCost = async function (bootcampId) {
       averageCost: Math.ceil(obj[0].averageCost / 10) * 10,
     });
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
   }
 };
 
@@ -82,4 +82,3 @@ courseSchema.pre("remove", async function () {
 });
 
 module.exports = mongoose.model("Course", courseSchema);
-partially
