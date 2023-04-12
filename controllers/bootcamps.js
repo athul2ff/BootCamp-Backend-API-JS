@@ -82,7 +82,6 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
   }
   console.log(`Courses being removed from bootcamp ${bootcamp._id}`);
   await Course.deleteMany({ bootcamp: bootcamp._id });
-  // await bootcamp.deleteOne();
 
   res.status(200).json({ success: true, data: {} });
 });

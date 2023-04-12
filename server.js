@@ -7,15 +7,21 @@ const connectDB = require("./config/db");
 const colors = require("colors");
 const bodyParser = require("body-parser");
 const fileupload = require("express-fileupload");
+const cookieParser = require("cookie-parser");
 
 // Body parser
 app.use(bodyParser.json());
 
+// Cookie parser
+app.use(cookieParser());
+
 // Routes files
 const bootcamps = require("./routes/bootcamps");
 const courses = require("./routes/courses");
-//const reviews = require("./routes/reviews");
+const reviews = require("./routes/reviews");
 const users = require("./routes/users");
+const auth = require("./routes/auth");
+
 const logger = require("./middleware/logger");
 const errorHandler = require("./middleware/error");
 
@@ -41,8 +47,8 @@ app.use(express.static(path.join(__dirname, "public")));
 // Mount Routers
 app.use("/api/v1/bootcamps", bootcamps);
 app.use("/api/v1/courses", courses);
-// app.get("/api/v1/reviews", reviews);
 app.use("/api/v1/users", users);
+app.use("/api/v1/auth", auth);
 
 app.use(errorHandler);
 
