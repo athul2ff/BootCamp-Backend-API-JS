@@ -23,6 +23,7 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
     if (!bootcamp) {
       return res.status(400).json({ success: false });
     }
+
     res.status(200).json({ success: true, data: bootcamp });
   } catch (error) {
     next(error);
@@ -34,6 +35,22 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 // @access   Private
 exports.createBootcamp = async (req, res, next) => {
   try {
+    // Add user to req.body
+    req.body.user = req.user.id;
+
+    // Check for published bootcamp
+    const publishedBootcamp = await Bootcamp.findOne({ user: req.user });
+
+    // If the user is not an admin, they can only add one bootcamp
+    if (publishedBootcamp && req.user.role !== "admin") {
+      return next(
+        new ErrorResponse(
+          `The user with ID ${req.user.id} has already published a bootcamp`,
+          400
+        )
+      );
+    }
+
     const bootcamp = await Bootcamp.create(req.body);
 
     res
@@ -53,6 +70,7 @@ exports.updateBootcamp = async (req, res, next) => {
       new: true,
       // runValidators: true,
     });
+
     if (!bootcamp) {
       return res.status(400).json({ success: false });
     }
@@ -105,6 +123,7 @@ exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
   const bootcamps = await Bootcamp.find({
     location: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
   });
+
   res.status(200).json({
     success: true,
     count: bootcamps.length,
@@ -150,7 +169,7 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
 
   file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async (err) => {
     if (err) {
-      console.log(err.message);
+      console.log(err);
       return next(new ErrorResponse(`Problem with file upload`, 500));
     }
   });

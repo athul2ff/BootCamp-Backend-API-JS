@@ -53,10 +53,11 @@ const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
   console.log("tkn", token);
 
+  const expiresIn = process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000; // convert days to milliseconds
+  const expiresDate = new Date(Date.now() + expiresIn);
+
   const options = {
-    // expires: new Date(
-    //   Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    // ),
+    expires: expiresDate.getTime(), // pass the Unix timestamp instead of Date object
     httpOnly: true,
   };
 
@@ -69,3 +70,15 @@ const sendTokenResponse = (user, statusCode, res) => {
     token,
   });
 };
+
+// @desc     Get current logged in user
+// @routes   POST /api/v1/auth/me
+// @access   Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
