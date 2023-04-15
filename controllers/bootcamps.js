@@ -66,14 +66,27 @@ exports.createBootcamp = async (req, res, next) => {
 // @access   Public
 exports.updateBootcamp = async (req, res, next) => {
   try {
-    const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      // runValidators: true,
-    });
+    let bootcamp = await Bootcamp.findById(req.params.id);
 
     if (!bootcamp) {
       return res.status(400).json({ success: false });
     }
+
+    // Make sure user is bootcamp owner
+    if (bootcamp.user.toString() !== req.user.id && req.user.role === "admin") {
+      return next(
+        new ErrorResponse(
+          `User ${req.params.id} is not authorized to update this bootcamp`,
+          401
+        )
+      );
+    }
+
+    bootcamp = await Bootcamp.findOneAndUpdate(req.params.id, req.body, {
+      new: true,
+      //runValidators: true,
+    });
+
     res.status(200).json({
       success: true,
       msg: `Update bootcamps ${req.params.id}`,

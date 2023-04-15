@@ -1,6 +1,6 @@
 //@desc     Get all Users
 //@routes   GET /api/v1/Users
-//@access    Public
+//@access   Public
 exports.getUsers = (req, res, next) => {
   res.status(200).json({ success: true, msg: "Show all Users" });
 };

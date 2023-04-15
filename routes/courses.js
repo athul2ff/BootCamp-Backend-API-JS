@@ -3,7 +3,7 @@ const router = express.Router({ mergeParams: true });
 const {
   getCourse,
   getCourses,
-  createCourse,
+  addCourse,
   updateCourse,
   deleteCourse,
 } = require("../controllers/courses");
@@ -21,7 +21,7 @@ router
     }),
     getCourses
   )
-  .post(protect, createCourse);
+  .post(protect, addCourse);
 
 router.route("/:bootcampId");
 
