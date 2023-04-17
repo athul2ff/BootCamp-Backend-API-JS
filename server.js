@@ -8,6 +8,7 @@ const colors = require("colors");
 const bodyParser = require("body-parser");
 const fileupload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
+const mongoSanitize = require("express-mongo-sanitize");
 
 // Body parser
 app.use(bodyParser.json());
@@ -38,6 +39,9 @@ if (process.env.NODE_ENV === "development") {
 
 // File uploading
 app.use(fileupload());
+
+// Sanitize data
+app.use(mongoSanitize());
 
 // Set static folder
 app.use(express.static(path.join(__dirname, "public")));
