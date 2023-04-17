@@ -64,7 +64,6 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 // @routes   POST /api/v1/auth/forgotpassword
 // @access   Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
-  console.log("helooooo hhhh", req.body.email);
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
@@ -139,9 +138,9 @@ exports.updateDetails = asyncHandler(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
   };
-  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate,{
-    new:true,
-    runValidators:true
+  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
   });
 
   res.status(200).json({
@@ -150,11 +149,27 @@ exports.updateDetails = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc     Update password
+// @routes   PUT /api/v1/auth/updatePassword
+// @access   Private
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select("+password");
+
+  // Check current password
+  if (!(await user.matchPassword(req.body.currentPassword.toString()))) {
+    return next(new ErrorResponse(`Password is incorrect`, 401));
+  }
+
+  user.password = req.body.newPassword;
+  await user.save();
+
+  sendTokenResponse(user, 200, res);
+});
+
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   // Create token
   const token = user.getSignedJwtToken();
-  console.log("tkn", token);
 
   const expiresIn = process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000; // convert days to milliseconds
   const expiresDate = new Date(Date.now() + expiresIn);

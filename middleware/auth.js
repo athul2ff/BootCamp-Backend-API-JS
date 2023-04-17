@@ -11,7 +11,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
-    console.log("hello", token);
   }
   //  else if (req.cookies.token) {
   //   token = req.cookies.token;
@@ -26,8 +25,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id);
-
-    console.log("hello world 4343", req.user);
 
     next();
   } catch (error) {
